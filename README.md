@@ -59,24 +59,20 @@ http://localhost:3000
   "name": "Jean Dupont",
   "phone": "06 12 34 56 78",
   "email": "jean.dupont@example.com",
-  "adressePostal": "123 Rue de Paris",
-  "codePostal": "75001",
-  "type": "Demande d'information",
-  "message": "Bonjour, j'aimerais avoir plus d'informations..."
+  "adressePostal": "123 Rue de Paris, 75001 Paris",
+  "NbrPieces": "3"
 }
 ```
 
 #### Champs obligatoires
 
-| Champ           | Type   | Description                                                             |
-| --------------- | ------ | ----------------------------------------------------------------------- |
-| `name`          | string | Nom complet du contact                                                  |
-| `phone`         | string | Numéro de téléphone                                                     |
-| `email`         | string | Adresse email du contact                                                |
-| `adressePostal` | string | Adresse postale complète                                                |
-| `codePostal`    | string | Code postal                                                             |
-| `type`          | string | Type de demande (ex: "Demande d'information", "Support", "Réclamation") |
-| `message`       | string | Message du contact                                                      |
+| Champ           | Type   | Description                         |
+| --------------- | ------ | ----------------------------------- |
+| `name`          | string | Nom complet du contact              |
+| `phone`         | string | Numéro de téléphone                 |
+| `email`         | string | Adresse email du contact            |
+| `adressePostal` | string | Adresse postale complète            |
+| `NbrPieces`     | string | Nombre de pièces du bien immobilier |
 
 ---
 
@@ -97,9 +93,7 @@ const sendEmail = async (formData) => {
         phone: formData.phone,
         email: formData.email,
         adressePostal: formData.adressePostal,
-        codePostal: formData.codePostal,
-        type: formData.type,
-        message: formData.message,
+        NbrPieces: formData.NbrPieces,
       }),
     });
 
@@ -133,9 +127,7 @@ const handleSubmit = async (e) => {
       phone: formData.phone,
       email: formData.email,
       adressePostal: formData.adressePostal,
-      codePostal: formData.codePostal,
-      type: formData.type,
-      message: formData.message,
+      NbrPieces: formData.NbrPieces,
     });
 
     if (response.data.success) {
@@ -159,9 +151,7 @@ methods: {
         phone: this.form.phone,
         email: this.form.email,
         adressePostal: this.form.adressePostal,
-        codePostal: this.form.codePostal,
-        type: this.form.type,
-        message: this.form.message
+        NbrPieces: this.form.NbrPieces
       });
 
       if (response.data.success) {
@@ -227,12 +217,3 @@ Pour utiliser Gmail, vous devez générer un **mot de passe d'application** :
 
 ---
 
-## 📞 Support
-
-Pour toute question ou problème d'intégration, contactez l'équipe backend.
-
----
-
-## 📄 Licence
-
-ISC
