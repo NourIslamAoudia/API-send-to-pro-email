@@ -32,7 +32,7 @@ app.post("/send-email", async (req, res) => {
     const mailOptions = {
       from: `"${name}" <${email}>`,
       to: process.env.EMAIL_TO_ADDRESS,
-      subject: `📩 Nouveau message de ${name}`,
+      subject: ` Nouveau message de ${name}`,
       text: `
 Nouveau message reçu depuis le formulaire de contact :
 
