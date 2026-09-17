@@ -31,7 +31,7 @@ app.use(express.json());
 // Limite : 5 requêtes / 15 min / IP sur la route d'envoi
 const sendEmailLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 20,
   message: {
     success: false,
     error: "Trop de tentatives, réessayez plus tard.",

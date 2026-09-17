@@ -1,127 +1,128 @@
-# 📨 API Send to Pro Email
+# API Send to Pro Email
 
-API REST moderne, sécurisée et modulaire pour l'envoi d'emails via formulaire de contact, développée avec **Node.js**, **Express** et **Nodemailer**.
+A modern, secure, and modular REST API for sending contact form emails, built with Node.js, Express, and Nodemailer.
 
 ---
 
-## 📋 Sommaire
+## Table of Contents
 
-- [✨ Fonctionnalités & Sécurité](#-fonctionnalités--sécurité)
-- [📁 Architecture du Projet](#-architecture-du-projet)
-- [🚀 Démarrage Rapide](#-démarrage-rapide)
-- [⚙️ Configuration (.env)](#️-configuration-env)
-- [📡 Documentation de l'API](#-documentation-de-lapi)
-  - [1. Statut & Exemple (GET /)](#1-statut--exemple-get-)
-  - [2. Envoi d'email (POST /send-email)](#2-envoi-demail-post-send-email)
-- [🛠️ Personnaliser le Schéma (`schema.js`)](#️-personnaliser-le-schéma-schemajs)
-- [💻 Exemples d'Intégration Frontend](#-exemples-dintégration-frontend)
+- [Features & Security](#features--security)
+- [Project Architecture](#project-architecture)
+- [Quick Start](#quick-start)
+- [Configuration (.env)](#configuration-env)
+- [API Documentation](#api-documentation)
+  - [1. Status & Example (GET /)](#1-status--example-get-)
+  - [2. Send Email (POST /send-email)](#2-send-email-post-send-email)
+- [Customizing the Schema (schema.js)](#customizing-the-schema-schemajs)
+- [Frontend Integration Examples](#frontend-integration-examples)
   - [JavaScript (Fetch)](#javascript-fetch)
   - [React (Axios)](#react-axios)
   - [Vue.js](#vuejs)
   - [cURL](#curl)
-- [🔒 Configuration du mot de passe d'application Gmail](#-configuration-du-mot-de-passe-dapplication-gmail)
+- [Configuring a Gmail App Password](#configuring-a-gmail-app-password)
+- [License](#license)
 
 ---
 
-## ✨ Fonctionnalités & Sécurité
+## Features & Security
 
-- **Schéma Modulaire Découplé (`schema.js`)** : Toutes les règles de validation, assainissement et gabarit d'email sont isolées dans `schema.js`. Modifier vos champs ne nécessite aucune modification dans `app.js`.
-- **Protection CORS configurable** : Whitelist d'origines autorisées via la variable `ALLOWED_ORIGINS`.
-- **Limiteur de débit (Rate Limiting)** : Protection anti-spam et anti-abus limitée à 5 requêtes toutes les 15 minutes par adresse IP (`express-rate-limit`).
-- **Protection contre les injections XSS / HTML** : Échappement systématique des entrées utilisateur (`escapeHtml`) avant intégration dans le courriel.
-- **Validation stricte des données** :
-  - Validation robuste de l'email avec la bibliothèque `validator`.
-  - Contrôle du format du numéro de téléphone par expression régulière.
-  - Vérification obligatoire du consentement RGPD (`consent: true`).
-- **Transport SMTP optimisé (`sendMail.js`)** :
-  - Résolution DNS IPv4 mise en cache pour éviter les ralentissements réseau.
-  - Délais d'expiration stricts (`connectionTimeout`, `greetingTimeout`, `socketTimeout`).
-  - Support TLS/SSL sécurisé avec configuration SNI.
-- **Masquage des erreurs sensibles** : Les détails techniques internes ne sont jamais divulgués au client HTTP.
+- **Decoupled Modular Schema (`schema.js`)**: All validation rules, input sanitization, and email templates are isolated in `schema.js`. Modifying or adding form fields requires zero changes to `app.js`.
+- **Configurable CORS Protection**: Domain whitelist managed through the `ALLOWED_ORIGINS` environment variable.
+- **Rate Limiting**: Anti-spam and abuse prevention capped at 5 requests per 15 minutes per IP address (`express-rate-limit`).
+- **XSS & HTML Injection Protection**: Systematic input escaping (`escapeHtml`) before inserting values into outgoing email templates.
+- **Strict Data Validation**:
+  - Strict email validation using the `validator` library.
+  - Regular expression validation for phone numbers.
+  - Mandatory GDPR consent verification (`consent: true`).
+- **Optimized SMTP Transport (`sendMail.js`)**:
+  - Cached IPv4 DNS resolution to prevent network lookup latency.
+  - Strict connection, greeting, and socket timeouts (`connectionTimeout`, `greetingTimeout`, `socketTimeout`).
+  - Secure TLS/SSL configuration with Server Name Indication (SNI).
+- **Error Masking**: Internal server and SMTP error details are hidden from the client to prevent sensitive data exposure.
 
 ---
 
-## 📁 Architecture du Projet
+## Project Architecture
 
 ```text
 .
-├── app.js             # Serveur Express, middlewares (CORS, Rate Limit) et routes
-├── schema.js          # Schéma des données, validation, assainissement et template d'email
-├── sendMail.js        # Configuration Nodemailer, résolution DNS et envoi SMTP
-├── package.json       # Dépendances et scripts du projet
-├── .env.example       # Modèle des variables d'environnement
-└── README.md          # Documentation complète du projet
+├── app.js             # Express server, middlewares (CORS, Rate Limit) and route handlers
+├── schema.js          # Data schema, validation, sanitization, and email template
+├── sendMail.js        # Nodemailer setup, DNS resolution, and SMTP transport
+├── package.json       # Project dependencies and scripts
+├── .env.example       # Environment variables template
+└── README.md          # Project documentation
 ```
 
 ---
 
-## 🚀 Démarrage Rapide
+## Quick Start
 
-### 1. Installation des dépendances
+### 1. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Configuration des variables d'environnement
+### 2. Configure Environment Variables
 
-Copiez le fichier d'exemple `.env.example` vers `.env` :
+Copy the example `.env.example` file to `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Puis complétez vos identifiants SMTP (voir la section [Configuration](#️-configuration-env)).
+Then fill in your SMTP credentials (see [Configuration](#configuration-env)).
 
-### 3. Lancement du serveur
+### 3. Start the Server
 
 ```bash
 npm start
 ```
 
-Le serveur démarrera par défaut sur `http://localhost:3000`.
+By default, the server runs on `http://localhost:3000`.
 
 ---
 
-## ⚙️ Configuration (.env)
+## Configuration (.env)
 
-| Variable           | Description                                             | Exemple                                     |
-| :----------------- | :------------------------------------------------------ | :------------------------------------------ |
-| `PORT`             | Port d'écoute du serveur Node.js                        | `3000`                                      |
-| `ALLOWED_ORIGINS`  | Origines autorisées par CORS (séparées par une virgule) | `https://monsite.com,http://localhost:5173` |
-| `EMAIL_USER`       | Adresse email expéditrice SMTP                          | `votre-adresse@gmail.com`                   |
-| `EMAIL_PASS`       | Mot de passe d'application SMTP                         | `xxxx xxxx xxxx xxxx`                       |
-| `SMTP_HOST`        | Hôte du serveur SMTP                                    | `smtp.gmail.com`                            |
-| `SMTP_PORT`        | Port SMTP (465 pour SSL, 587 pour TLS)                  | `465`                                       |
-| `EMAIL_TO_ADDRESS` | Adresse email destinataire recevant les messages        | `contact@monentreprise.com`                 |
+| Variable           | Description                                       | Example                                       |
+| :----------------- | :------------------------------------------------ | :-------------------------------------------- |
+| `PORT`             | Node.js server port                               | `3000`                                        |
+| `ALLOWED_ORIGINS`  | Comma-separated list of allowed CORS origins      | `https://mywebsite.com,http://localhost:5173` |
+| `EMAIL_USER`       | SMTP sender email address                         | `your-email@gmail.com`                        |
+| `EMAIL_PASS`       | SMTP application password                         | `xxxx xxxx xxxx xxxx`                         |
+| `SMTP_HOST`        | SMTP server host                                  | `smtp.gmail.com`                              |
+| `SMTP_PORT`        | SMTP server port (465 for SSL, 587 for TLS)       | `465`                                         |
+| `EMAIL_TO_ADDRESS` | Destination email address receiving form messages | `contact@mybusiness.com`                      |
 
-Exemple de fichier `.env` :
+Example `.env` file:
 
 ```env
 PORT=3000
-ALLOWED_ORIGINS=https://monsite.com,http://localhost:5173
-EMAIL_USER=mon-compte@gmail.com
+ALLOWED_ORIGINS=https://mywebsite.com,http://localhost:5173
+EMAIL_USER=my-account@gmail.com
 EMAIL_PASS=abcd efgh ijkl mnop
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
-EMAIL_TO_ADDRESS=destinataire@gmail.com
+EMAIL_TO_ADDRESS=destination@gmail.com
 ```
 
 ---
 
-## 📡 Documentation de l'API
+## API Documentation
 
-### 1. Statut & Exemple (GET `/`)
+### 1. Status & Example (GET `/`)
 
-Permet de vérifier que l'API est en ligne et retourne un exemple du payload attendu.
+Check server availability and view the expected payload structure.
 
-- **URL** : `/`
-- **Méthode** : `GET`
-- **Réponse (200 OK)** :
+- **URL**: `/`
+- **Method**: `GET`
+- **Response (200 OK)**:
 
 ```json
 {
-  "message": "📨 API Send Email - Serveur actif !",
+  "message": "API Send Email - Server active!",
   "example": {
     "endpoint": "/send-email",
     "method": "POST",
@@ -140,38 +141,38 @@ Permet de vérifier que l'API est en ligne et retourne un exemple du payload att
 
 ---
 
-### 2. Envoi d'email (POST `/send-email`)
+### 2. Send Email (POST `/send-email`)
 
-Endpoint principal pour soumettre le formulaire de contact.
+Main endpoint for submitting contact form requests.
 
-- **URL** : `/send-email`
-- **Méthode** : `POST`
-- **Rate Limit** : 5 requêtes / 15 minutes par IP
-- **Headers** :
+- **URL**: `/send-email`
+- **Method**: `POST`
+- **Rate Limit**: 5 requests / 15 minutes per IP
+- **Headers**:
   ```json
   {
     "Content-Type": "application/json"
   }
   ```
 
-#### Corps de la requête (JSON Body)
+#### Request Body (JSON)
 
-| Champ              | Type       | Obligatoire | Description / Règle de validation                                                            |
-| :----------------- | :--------- | :---------- | :------------------------------------------------------------------------------------------- |
-| `name`             | `string`   | **Oui**     | Nom complet du contact (non vide).                                                           |
-| `email`            | `string`   | **Oui**     | Adresse email valide (vérifiée via `validator.isEmail`).                                     |
-| `phone`            | `string`   | **Oui**     | Numéro de téléphone (6 à 20 caractères autorisant chiffres, `+`, `-`, espaces, parenthèses). |
-| `selectedServices` | `string[]` | **Oui**     | Tableau contenant au moins un service sélectionné.                                           |
-| `consent`          | `boolean`  | **Oui**     | Consentement obligatoire (`true`).                                                           |
-| `company`          | `string`   | Non         | Nom de l'entreprise (valeur par défaut : `"non renseignée"`).                                |
-| `locale`           | `string`   | Non         | Langue de l'utilisateur (ex: `"fr"`, `"en"`, valeur par défaut : `"non spécifiée"`).         |
+| Field              | Type       | Required | Description / Validation Rule                                                      |
+| :----------------- | :--------- | :------- | :--------------------------------------------------------------------------------- |
+| `name`             | `string`   | **Yes**  | Full contact name (non-empty).                                                     |
+| `email`            | `string`   | **Yes**  | Valid email address (validated with `validator.isEmail`).                          |
+| `phone`            | `string`   | **Yes**  | Phone number (6 to 20 characters, allowing digits, `+`, `-`, spaces, parentheses). |
+| `selectedServices` | `string[]` | **Yes**  | Array with at least one selected service.                                          |
+| `consent`          | `boolean`  | **Yes**  | Explicit user consent (`true` required).                                           |
+| `company`          | `string`   | No       | Company name (defaults to: `"non renseignée"`).                                    |
+| `locale`           | `string`   | No       | User language code (e.g., `"fr"`, `"en"`, defaults to: `"non spécifiée"`).         |
 
-Exemple de requête :
+Example request:
 
 ```json
 {
   "locale": "fr",
-  "selectedServices": ["Développement Web", "SEO & Marketing"],
+  "selectedServices": ["Web Development", "SEO & Marketing"],
   "name": "Sarah Connor",
   "email": "sarah.connor@example.com",
   "phone": "+33 6 12 34 56 78",
@@ -180,9 +181,9 @@ Exemple de requête :
 }
 ```
 
-#### Réponses possibles
+#### Possible Responses
 
-##### Succès (200 OK)
+##### Success (200 OK)
 
 ```json
 {
@@ -190,7 +191,7 @@ Exemple de requête :
 }
 ```
 
-##### Erreur de validation (400 Bad Request)
+##### Validation Error (400 Bad Request)
 
 ```json
 {
@@ -199,9 +200,9 @@ Exemple de requête :
 }
 ```
 
-_(Autres messages possibles : `"Adresse email invalide."`, `"Numéro de téléphone invalide."`, `"Veuillez sélectionner au moins un service."`)_
+_(Other possible error messages: `"Adresse email invalide."`, `"Numéro de téléphone invalide."`, `"Veuillez sélectionner au moins un service."`)_
 
-##### Limite de requêtes dépassée (429 Too Many Requests)
+##### Rate Limit Exceeded (429 Too Many Requests)
 
 ```json
 {
@@ -210,13 +211,13 @@ _(Autres messages possibles : `"Adresse email invalide."`, `"Numéro de téléph
 }
 ```
 
-##### Origine CORS non autorisée (500 Error)
+##### Origin Disallowed by CORS (500 Error)
 
 ```text
 Error: Non autorisé par CORS
 ```
 
-##### Erreur serveur ou SMTP (500 Internal Server Error)
+##### Internal Server or SMTP Error (500 Internal Server Error)
 
 ```json
 {
@@ -227,26 +228,26 @@ Error: Non autorisé par CORS
 
 ---
 
-## 🛠️ Personnaliser le Schéma (`schema.js`)
+## Customizing the Schema (`schema.js`)
 
-Le projet sépare entièrement la logique de validation et de templating dans [schema.js](schema.js).
-**Vous n'avez plus besoin d'ouvrir ou de modifier `app.js` pour ajouter ou modifier des champs.**
+The project isolates validation and email templating logic inside [schema.js](schema.js).
+**You do not need to open or edit `app.js` when adding or modifying form fields.**
 
-### Exemple : Comment ajouter un champ `message` et `budget` ?
+### Example: Adding `message` and `budget` Fields
 
-Ouvrez simplement `schema.js` :
+Open `schema.js`:
 
-#### 1. Mettre à jour `examplePayload`
+#### 1. Update `examplePayload`
 
 ```javascript
 const examplePayload = {
-  // ... champs existants
-  budget: "5000€ - 10000€",
-  message: "Bonjour, je souhaite un devis...",
+  // ... existing fields
+  budget: "$5,000 - $10,000",
+  message: "Hello, I would like to request a quote...",
 };
 ```
 
-#### 2. Ajouter la validation et l'échappement dans `validate(body)`
+#### 2. Add Validation and Sanitization in `validate(body)`
 
 ```javascript
 function validate(body) {
@@ -262,17 +263,17 @@ function validate(body) {
     message,
   } = body;
 
-  // Validation requise si nécessaire
+  // Custom validation if required
   if (!message || message.trim().length < 5) {
     return {
       valid: false,
-      error: "Le message doit contenir au moins 5 caractères.",
+      error: "The message must be at least 5 characters long.",
     };
   }
 
   const sanitized = {
-    // ... champs existants
-    budget: escapeHtml(budget || "non renseigné"),
+    // ... existing fields
+    budget: escapeHtml(budget || "not specified"),
     message: escapeHtml(message),
   };
 
@@ -280,7 +281,7 @@ function validate(body) {
 }
 ```
 
-#### 3. Intégrer les champs dans l'email (`buildEmail`)
+#### 3. Include the New Fields in `buildEmail`
 
 ```javascript
 function buildEmail(data) {
@@ -296,23 +297,23 @@ function buildEmail(data) {
   } = data;
 
   const text = `
-Nouveau message de : ${name}
-Budget : ${budget}
-Message : ${message}
+New message from: ${name}
+Budget: ${budget}
+Message: ${message}
 ...
   `.trim();
 
   const html = `
     <div>
-      <h2>Nouveau message de ${name}</h2>
-      <p><strong>Budget :</strong> ${budget}</p>
-      <p><strong>Message :</strong></p>
+      <h2>New message from ${name}</h2>
+      <p><strong>Budget:</strong> ${budget}</p>
+      <p><strong>Message:</strong></p>
       <p>${message}</p>
     </div>
   `.trim();
 
   return {
-    subject: `Nouveau message de ${name}`,
+    subject: `New message from ${name}`,
     replyTo: `"${name}" <${data.rawEmail}>`,
     text,
     html,
@@ -320,11 +321,11 @@ Message : ${message}
 }
 ```
 
-C'est terminé ! `app.js` prendra immédiatement en compte vos modifications.
+`app.js` automatically integrates the new schema without any modifications.
 
 ---
 
-## 💻 Exemples d'Intégration Frontend
+## Frontend Integration Examples
 
 ### JavaScript (Fetch)
 
@@ -337,8 +338,8 @@ async function sendContactForm(formData) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        locale: "fr",
-        selectedServices: ["Audit", "Refonte Site Web"],
+        locale: "en",
+        selectedServices: ["Audit", "Website Redesign"],
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -350,13 +351,13 @@ async function sendContactForm(formData) {
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result.error || "Erreur lors de l'envoi");
+      throw new Error(result.error || "Failed to send message");
     }
 
-    console.log("✅ Message envoyé avec succès !");
+    console.log("Message sent successfully!");
     return result;
   } catch (error) {
-    console.error("❌ Erreur :", error.message);
+    console.error("Error:", error.message);
     throw error;
   }
 }
@@ -374,7 +375,7 @@ export default function ContactForm() {
     email: "",
     phone: "",
     company: "",
-    services: ["Développement"],
+    services: ["Development"],
     consent: false,
   });
   const [status, setStatus] = useState({ loading: false, msg: "" });
@@ -385,7 +386,7 @@ export default function ContactForm() {
 
     try {
       const response = await axios.post("http://localhost:3000/send-email", {
-        locale: "fr",
+        locale: "en",
         selectedServices: formData.services,
         name: formData.name,
         email: formData.email,
@@ -395,10 +396,10 @@ export default function ContactForm() {
       });
 
       if (response.data.success) {
-        setStatus({ loading: false, msg: "Message envoyé avec succès !" });
+        setStatus({ loading: false, msg: "Message sent successfully!" });
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.error || "Erreur lors de l'envoi";
+      const errorMsg = err.response?.data?.error || "Failed to send message";
       setStatus({ loading: false, msg: errorMsg });
     }
   };
@@ -407,28 +408,28 @@ export default function ContactForm() {
     <form onSubmit={handleSubmit}>
       <input
         type="text"
-        placeholder="Votre nom"
+        placeholder="Your name"
         value={formData.name}
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         required
       />
       <input
         type="email"
-        placeholder="Votre email"
+        placeholder="Your email"
         value={formData.email}
         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         required
       />
       <input
         type="tel"
-        placeholder="Téléphone"
+        placeholder="Phone"
         value={formData.phone}
         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         required
       />
       <input
         type="text"
-        placeholder="Entreprise"
+        placeholder="Company"
         value={formData.company}
         onChange={(e) => setFormData({ ...formData, company: e.target.value })}
       />
@@ -441,10 +442,10 @@ export default function ContactForm() {
           }
           required
         />
-        J'accepte le traitement de mes données (RGPD)
+        I agree to the processing of my personal data (GDPR)
       </label>
       <button type="submit" disabled={status.loading}>
-        {status.loading ? "Envoi en cours..." : "Envoyer"}
+        {status.loading ? "Sending..." : "Send"}
       </button>
       {status.msg && <p>{status.msg}</p>}
     </form>
@@ -462,7 +463,7 @@ methods: {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          locale: this.locale || "fr",
+          locale: this.locale || "en",
           selectedServices: this.selectedServices,
           name: this.name,
           email: this.email,
@@ -474,14 +475,14 @@ methods: {
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        alert(data.error || "Erreur lors de l'envoi");
+        alert(data.error || "Failed to send message");
         return;
       }
 
-      alert("Email envoyé avec succès !");
+      alert("Email sent successfully!");
     } catch (error) {
       console.error(error);
-      alert("Erreur réseau ou serveur inaccessible");
+      alert("Network error or unreachable server");
     }
   }
 }
@@ -493,30 +494,30 @@ methods: {
 curl -X POST http://localhost:3000/send-email \
   -H "Content-Type: application/json" \
   -d '{
-    "locale": "fr",
-    "selectedServices": ["Service Web"],
-    "name": "Jean Dupont",
-    "email": "jean.dupont@example.com",
-    "phone": "+33 6 11 22 33 44",
-    "company": "Acme SAS",
+    "locale": "en",
+    "selectedServices": ["Web Services"],
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "+1 555 123 4567",
+    "company": "Acme Corp",
     "consent": true
   }'
 ```
 
 ---
 
-## 🔒 Configuration du mot de passe d'application Gmail
+## Configuring a Gmail App Password
 
-Pour envoyer des emails via Gmail en toute sécurité :
+To send emails through Gmail securely:
 
-1. Rendez-vous sur votre compte Google : [Sécurité Google](https://myaccount.google.com/security).
-2. Activez la **Validation en deux étapes** si ce n'est pas déjà fait.
-3. Recherchez **Mots de passe des applications** (ou visitez `https://myaccount.google.com/apppasswords`).
-4. Donnez un nom à l'application (ex: `API Send Email`).
-5. Copiez le mot de passe généré (16 caractères) et collez-le dans votre fichier `.env` sous `EMAIL_PASS`.
+1. Go to your Google Account: [Google Security Settings](https://myaccount.google.com/security).
+2. Enable **2-Step Verification** if not already active.
+3. Search for **App passwords** (or go to `https://myaccount.google.com/apppasswords`).
+4. Enter an application name (for instance: `API Send Email`).
+5. Copy the generated 16-character password and paste it into your `.env` file under `EMAIL_PASS`.
 
 ---
 
-## 📄 Licence
+## License
 
-Ce projet est sous licence ISC.
+This project is licensed under the ISC License.
