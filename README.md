@@ -133,6 +133,7 @@ Check server availability and view the expected payload structure.
       "email": "nom@example.com",
       "phone": "+213 555 555 555",
       "company": "Entreprise SARL",
+      "Project_Scope": "Refonte du site web et intégration CRM",
       "consent": true
     }
   }
@@ -166,6 +167,7 @@ Main endpoint for submitting contact form requests.
 | `consent`          | `boolean`  | **Yes**  | Explicit user consent (`true` required).                                           |
 | `company`          | `string`   | No       | Company name (defaults to: `"non renseignée"`).                                    |
 | `locale`           | `string`   | No       | User language code (e.g., `"fr"`, `"en"`, defaults to: `"non spécifiée"`).         |
+| `Project_Scope`    | `string`   | No       | Project scope or description (optional, can be empty or omitted).                 |
 
 Example request:
 
@@ -177,6 +179,7 @@ Example request:
   "email": "sarah.connor@example.com",
   "phone": "+33 6 12 34 56 78",
   "company": "Cyberdyne Systems",
+  "Project_Scope": "Complete website redesign and CRM setup",
   "consent": true
 }
 ```
@@ -344,6 +347,7 @@ async function sendContactForm(formData) {
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
+        Project_Scope: formData.projectScope,
         consent: true,
       }),
     });
@@ -375,6 +379,7 @@ export default function ContactForm() {
     email: "",
     phone: "",
     company: "",
+    projectScope: "",
     services: ["Development"],
     consent: false,
   });
@@ -392,6 +397,7 @@ export default function ContactForm() {
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
+        Project_Scope: formData.projectScope,
         consent: formData.consent,
       });
 
@@ -433,6 +439,14 @@ export default function ContactForm() {
         value={formData.company}
         onChange={(e) => setFormData({ ...formData, company: e.target.value })}
       />
+      <input
+        type="text"
+        placeholder="Project scope / Description"
+        value={formData.projectScope}
+        onChange={(e) =>
+          setFormData({ ...formData, projectScope: e.target.value })
+        }
+      />
       <label>
         <input
           type="checkbox"
@@ -469,6 +483,7 @@ methods: {
           email: this.email,
           phone: this.phone,
           company: this.company,
+          Project_Scope: this.projectScope,
           consent: this.consent,
         }),
       });
@@ -500,6 +515,7 @@ curl -X POST http://localhost:3000/send-email \
     "email": "john.doe@example.com",
     "phone": "+1 555 123 4567",
     "company": "Acme Corp",
+    "Project_Scope": "Complete redesign",
     "consent": true
   }'
 ```

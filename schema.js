@@ -10,6 +10,7 @@ const examplePayload = {
   email: "nom@example.com",
   phone: "+213 555 555 555",
   company: "Entreprise SARL",
+  Project_Scope: "Refonte du site web et intégration CRM",
   consent: true,
 };
 
@@ -39,8 +40,16 @@ function validate(body) {
     return { valid: false, error: "Le corps de la requête est invalide." };
   }
 
-  const { locale, selectedServices, name, email, phone, company, consent } =
-    body;
+  const {
+    locale,
+    selectedServices,
+    name,
+    email,
+    phone,
+    company,
+    consent,
+    Project_Scope,
+  } = body;
 
   // 1. Validation des champs obligatoires
   if (!name || !email || !phone || consent !== true) {
@@ -74,6 +83,14 @@ function validate(body) {
     };
   }
 
+  // Récupération de Project_Scope (tolère Project_Scope, project_scope ou projectScope)
+  const rawProjectScope =
+    Project_Scope !== undefined
+      ? Project_Scope
+      : body.project_scope !== undefined
+        ? body.project_scope
+        : body.projectScope;
+
   // 5. Nettoyage et assainissement des données (échappement HTML)
   const sanitized = {
     locale: escapeHtml(locale || "non spécifiée"),
@@ -83,6 +100,7 @@ function validate(body) {
     rawEmail: String(email).trim(), // Utilisé pour replyTo sans entités HTML
     phone: escapeHtml(phone),
     company: escapeHtml(company || "non renseignée"),
+    Project_Scope: escapeHtml(rawProjectScope || "non renseigné"),
     consent: Boolean(consent),
   };
 
@@ -108,6 +126,7 @@ function buildEmail(data) {
     rawEmail,
     phone,
     company,
+    Project_Scope,
   } = data;
 
   const servicesText = selectedServices.join(", ");
@@ -123,6 +142,7 @@ Nom complet : ${name}
 Email : ${email}
 Téléphone : ${phone}
 Entreprise : ${company}
+Périmètre du projet : ${Project_Scope}
 Services sélectionnés : ${servicesText}
 Consentement : Oui
   `.trim();
@@ -135,6 +155,7 @@ Consentement : Oui
       <p><strong>Email :</strong> <a href="mailto:${email}">${email}</a></p>
       <p><strong>Téléphone :</strong> ${phone}</p>
       <p><strong>Entreprise :</strong> ${company}</p>
+      <p><strong>Périmètre du projet :</strong> ${Project_Scope}</p>
       <p><strong>Services sélectionnés :</strong></p>
       <ul>${servicesHtml}</ul>
       <p><strong>Consentement RGPD :</strong> Oui</p>
@@ -157,4 +178,3 @@ module.exports = {
   validate,
   buildEmail,
 };
-
