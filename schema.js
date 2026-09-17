@@ -202,7 +202,7 @@ Here is a summary of the details you submitted:
 We typically respond within 24 to 48 business hours. If you have any additional details or urgent questions, please feel free to reply directly to this email.
 
 Best regards,
-The Team
+Shams Agency Team
   `.trim();
 
   const html = `

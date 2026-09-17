@@ -94,7 +94,7 @@ app.post("/send-email", sendEmailLimiter, async (req, res) => {
     try {
       const autoReply = buildAutoReplyEmail(data);
       const autoReplyOptions = {
-        from: `"Support Team" <${process.env.EMAIL_USER}>`,
+        from: `"Shams Agency Support Team" <${process.env.EMAIL_USER}>`,
         replyTo: process.env.EMAIL_TO_ADDRESS || process.env.EMAIL_USER,
         to: data.rawEmail,
         subject: autoReply.subject,
