@@ -112,7 +112,7 @@ function validate(body) {
 
 /**
  * Construit le sujet et le contenu (texte brut + HTML) de l'email
- * à partir des données validées et assainies.
+ * à destination de l'administrateur / entreprise.
  *
  * @param {object} data - Données retournées par validate().data
  * @returns {{ subject: string, replyTo: string, text: string, html: string }}
@@ -172,9 +172,79 @@ Consentement : Oui
   };
 }
 
+/**
+ * Construit l'email de confirmation automatique (Auto-Reply) en anglais
+ * envoyé à l'utilisateur qui a soumis le formulaire.
+ *
+ * @param {object} data - Données retournées par validate().data
+ * @returns {{ subject: string, text: string, html: string }}
+ */
+function buildAutoReplyEmail(data) {
+  const { name, company, phone, selectedServices, Project_Scope } = data;
+
+  const servicesText = selectedServices.join(", ");
+  const servicesHtml = selectedServices.map((s) => `<li>${s}</li>`).join("");
+
+  const subject = `Thank you for reaching out, ${name}!`;
+
+  const text = `
+Hello ${name},
+
+Thank you for contacting us! We have received your message and our team is currently reviewing your inquiry.
+
+Here is a summary of the details you submitted:
+- Name: ${name}
+- Company: ${company}
+- Phone: ${phone}
+- Project Scope: ${Project_Scope}
+- Selected Services: ${servicesText}
+
+We typically respond within 24 to 48 business hours. If you have any additional details or urgent questions, please feel free to reply directly to this email.
+
+Best regards,
+The Team
+  `.trim();
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+      <div style="background-color: #007BFF; color: #ffffff; padding: 24px; text-align: center;">
+        <h1 style="margin: 0; font-size: 22px;">Thank You for Reaching Out!</h1>
+      </div>
+      <div style="padding: 24px;">
+        <p style="font-size: 16px;">Hello <strong>${name}</strong>,</p>
+        <p>Thank you for contacting us. We have received your message and our team is currently reviewing your request.</p>
+        
+        <div style="background-color: #f9f9f9; border-left: 4px solid #007BFF; padding: 16px; margin: 20px 0; border-radius: 4px;">
+          <h3 style="margin-top: 0; color: #333; font-size: 15px;">Summary of your inquiry:</h3>
+          <p style="margin: 6px 0;"><strong>Company:</strong> ${company}</p>
+          <p style="margin: 6px 0;"><strong>Phone:</strong> ${phone}</p>
+          <p style="margin: 6px 0;"><strong>Project Scope:</strong> ${Project_Scope}</p>
+          <p style="margin: 6px 0;"><strong>Selected Services:</strong></p>
+          <ul style="margin: 6px 0; padding-left: 20px;">
+            ${servicesHtml}
+          </ul>
+        </div>
+
+        <p>We typically respond within <strong>24 to 48 business hours</strong>. If you have any additional information or urgent questions, you can reply directly to this email.</p>
+        <p style="margin-top: 24px; font-size: 14px; color: #555;">Best regards,<br><strong>The Team</strong></p>
+      </div>
+      <div style="background-color: #f4f4f4; color: #888; text-align: center; padding: 12px; font-size: 12px;">
+        This is an automated confirmation of your request.
+      </div>
+    </div>
+  `.trim();
+
+  return {
+    subject,
+    text,
+    html,
+  };
+}
+
 module.exports = {
   examplePayload,
   escapeHtml,
   validate,
   buildEmail,
+  buildAutoReplyEmail,
 };

@@ -38,6 +38,7 @@ A modern, secure, and modular REST API for sending contact form emails, built wi
   - Cached IPv4 DNS resolution to prevent network lookup latency.
   - Strict connection, greeting, and socket timeouts (`connectionTimeout`, `greetingTimeout`, `socketTimeout`).
   - Secure TLS/SSL configuration with Server Name Indication (SNI).
+- **Automated Confirmation Email (Auto-Reply)**: Automatically dispatches a clean confirmation email in English to the client upon form submission, summarizing their request and setting expectations for follow-up.
 - **Error Masking**: Internal server and SMTP error details are hidden from the client to prevent sensitive data exposure.
 
 ---
@@ -325,6 +326,8 @@ Message: ${message}
 ```
 
 `app.js` automatically integrates the new schema without any modifications.
+
+Similarly, you can customize the client confirmation message and design anytime by editing `buildAutoReplyEmail(data)` in [schema.js](schema.js).
 
 ---
 

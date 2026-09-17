@@ -2,7 +2,12 @@ const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const sendMail = require("./sendMail");
-const { validate, buildEmail, examplePayload } = require("./schema");
+const {
+  validate,
+  buildEmail,
+  buildAutoReplyEmail,
+  examplePayload,
+} = require("./schema");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,7 +47,7 @@ const sendEmailLimiter = rateLimit({
 
 app.get("/", (req, res) => {
   res.json({
-    message: "📨 API Send Email - Serveur actif !",
+    message: "API Send Email - Serveur actif !",
     example: {
       endpoint: "/send-email",
       method: "POST",
@@ -62,6 +67,7 @@ app.post("/send-email", sendEmailLimiter, async (req, res) => {
       });
     }
 
+    // 1. Email principal envoyé à l'administrateur
     const { subject, replyTo, text, html } = buildEmail(data);
 
     const mailOptions = {
@@ -82,6 +88,29 @@ app.post("/send-email", sendEmailLimiter, async (req, res) => {
         success: false,
         error: "Une erreur est survenue lors de l'envoi de l'email.",
       });
+    }
+
+    // 2. Email de confirmation automatique (Auto-Reply en anglais) envoyé au client
+    try {
+      const autoReply = buildAutoReplyEmail(data);
+      const autoReplyOptions = {
+        from: `"Support Team" <${process.env.EMAIL_USER}>`,
+        replyTo: process.env.EMAIL_TO_ADDRESS || process.env.EMAIL_USER,
+        to: data.rawEmail,
+        subject: autoReply.subject,
+        text: autoReply.text,
+        html: autoReply.html,
+      };
+
+      const autoReplyResult = await sendMail(autoReplyOptions);
+      if (!autoReplyResult.success) {
+        console.warn(
+          "Avertissement: L'auto-reply n'a pas pu être envoyé:",
+          autoReplyResult.error,
+        );
+      }
+    } catch (autoReplyErr) {
+      console.error("Erreur lors de l'envoi de l'auto-reply:", autoReplyErr);
     }
 
     res.status(200).json({ success: true });
